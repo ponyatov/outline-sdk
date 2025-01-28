@@ -1,9 +1,12 @@
+MODULE = $(notdir $(CURDIR))
+
 # version
 GO_VER = 1.23.5
 GO_GZ  = go$(GO_VER).linux-amd64.tar.gz
 GO_URL = http://go.dev/dl
 
 # dir
+CWD    = $(CURDIR)
 DISTR  = $(HOME)/distr
 GOROOT = /usr/local/go
 GO     = $(GOROOT)/bin/go
@@ -20,7 +23,9 @@ G += $(wildcard $(SRC)/*.go)
 .PHONY: all
 all: $(GO)
 	echo '\n# Go' >> ~/.setenv
-	echo 'export PATH=$(GOROOT)/bin:$$PATH' >> ~/.setenv
+	echo 'export GOROOT=$(GOROOT)' >> ~/.setenv
+	echo 'export PATH=$$GOROOT/bin:$$PATH' >> ~/.setenv
+	echo '# export GOPATH=$$HOME/$(MODULE)' >> ~/.setenv
 
 $(CLI): Makefile $(G)
 	cd $(SRC) ; go build -o $@  -ldflags="-extldflags=-static" .
