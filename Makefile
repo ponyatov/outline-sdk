@@ -10,10 +10,12 @@ CWD    = $(CURDIR)
 DISTR  = $(HOME)/distr
 GOROOT = /usr/local/go
 GO     = $(GOROOT)/bin/go
+X      = $(CWD)/x/examples
 
 # tool
 CURL = curl -L -o
 GO   = $(GOROOT)/bin/go
+CLI  = $(HOME)/bin/outline-cli
 
 CLI = $(HOME)/bin/outline-cli 
 SRC = x/examples/outline-cli
@@ -21,14 +23,13 @@ SRC = x/examples/outline-cli
 G += $(wildcard $(SRC)/*.go)
 
 .PHONY: all
-all: $(GO)
-	echo '\n# Go' >> ~/.setenv
-	echo 'export GOROOT=$(GOROOT)' >> ~/.setenv
-	echo 'export PATH=$$GOROOT/bin:$$PATH' >> ~/.setenv
-	echo '# export GOPATH=$$HOME/$(MODULE)' >> ~/.setenv
+all: $(CLI)
+	$^ -transport
 
-$(CLI): Makefile $(G)
-	cd $(SRC) ; go build -o $@  -ldflags="-extldflags=-static" .
+$(CLI): $(GO)
+	cd $(X) ; go build -o $@  -ldflags="-extldflags=-static" ./outline-cli
+
+# $(CLI): Makefile $(G)
 
 # doc
 # https://github.com/Jigsaw-Code/outline-sdk/issues/194
@@ -38,6 +39,15 @@ $(GO): $(DISTR)/Linux/$(GO_GZ)
 	sudo apt purge -y golang* ; sudo rm -rf $(GOROOT)
 	sudo tar -C /usr/local -xzf $<
 	sudo touch $@
+	$(MAKE) $(HOME)/.setenv
+
+.PHONY: $(HOME)/.setenv
+$(HOME)/.setenv:
+	echo '\n# Go' >> $@
+	echo 'export GOROOT=$(GOROOT)' >> $@
+	echo 'export PATH=$$GOROOT/bin:$$PATH' >> $@
+	echo '# export GOPATH=$$HOME/$(MODULE)' >> $@
+	. $@
 
 $(DISTR)/Linux/$(GO_GZ):
 	$(CURL) $@ $(GO_URL)/$(GO_GZ)
